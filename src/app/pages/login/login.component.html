@@ -1,0 +1,31 @@
+<div class="login-wrapper">
+  <h1>Happy Birthday 💙</h1>
+  <p class="subtitle">
+    Để vào thế giới bí mật này,<br>
+    hãy kéo chọn đúng ngày em xuất hiện trên thế giới nhé.
+  </p>
+
+  <form (ngSubmit)="onSubmit()">
+    <label for="birthdate" class="label">
+      Ngày sinh của em
+    </label>
+
+    <!-- input date trên mobile sẽ là kiểu thanh cuộn (picker) -->
+    <input
+      id="birthdate"
+      name="birthdate"
+      type="date"
+      class="input"
+      [(ngModel)]="birthdate"
+      required
+    >
+
+    <div class="error" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <button class="btn" type="submit">
+      Mở quà 💌
+    </button>
+  </form>
+</div>

@@ -1,0 +1,28 @@
+.login-wrapper {
+  text-align: center;
+}
+
+.subtitle {
+  margin-bottom: 24px;
+  opacity: 0.9;
+}
+
+.label {
+  display: block;
+  text-align: left;
+  margin-bottom: 8px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+form {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.error {
+  color: #ffb7b7;
+  font-size: 13px;
+}

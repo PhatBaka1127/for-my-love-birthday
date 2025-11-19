@@ -1,0 +1,48 @@
+.wish-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Ảnh */
+.wish-image {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+
+  /* khoảng cách */
+  margin-top: 20px;   /* ảnh cách phần trên */
+  margin-bottom: 25px; /* ảnh cách text phía dưới */
+}
+
+/* Text */
+.wish-text {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 30px; /* tạo khoảng cách dưới text trước khi tới nút */
+  padding: 0 20px;
+}
+
+.page-indicator {
+  margin-bottom: 10px;
+  opacity: 0.75;
+  font-size: 14px;
+}
+
+/* nút nằm cách dưới đẹp */
+.btn-row {
+  margin-top: 10px;
+}
+
+.wish-video {
+  width: 300px;
+  height: 180px;
+  border-radius: 18px;
+  margin-top: 16px;
+  margin-bottom: 22px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  animation: fadeIn 0.6s ease-in-out;
+}

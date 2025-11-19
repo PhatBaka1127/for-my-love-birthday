@@ -1,0 +1,41 @@
+<div class="wish-wrapper">
+  <!-- Trang số -->
+  <div class="page-indicator">
+    Trang {{ currentIndex + 1 }} / {{ wishes.length }}
+  </div>
+
+  <!-- Ảnh (chỉ hiển thị nếu có img) -->
+  <img
+    *ngIf="wishes[currentIndex].img"
+    [src]="wishes[currentIndex].img"
+    alt="wish image"
+    class="wish-image"
+  />
+
+  <!-- Nội dung -->
+  <p class="wish-text">
+    {{ wishes[currentIndex].text }}
+  </p>
+
+  <!-- VIDEO chỉ ở trang cuối -->
+  <div *ngIf="isLast" class="video-container">
+    <video controls class="wish-video">
+      <!-- Đặt video của bạn vào đây -->
+      <source src="assets/video/birthday-video.mp4" type="video/mp4" />
+      Trình duyệt của em không hỗ trợ video rồi 🥺
+    </video>
+  </div>
+
+  <!-- Nút điều hướng -->
+  <div class="btn-row">
+    <button class="btn secondary" (click)="goPrev()" [disabled]="isFirst">
+      ◀ Trang trước
+    </button>
+
+    <button class="btn" *ngIf="!isLast" (click)="goNext()">Trang tiếp ▶</button>
+
+    <button class="btn" *ngIf="isLast" (click)="goBackToFirstWish()">
+      Quay lại điều ước đầu 💌
+    </button>
+  </div>
+</div>
