@@ -7,207 +7,152 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['./wish-page.component.css'],
 })
 export class WishPageComponent implements OnInit, OnDestroy {
-  // 🔊 Nhạc nền
+
   private bgMusic = new Audio('assets/musics/music.m4a');
   private fadeOutInterval: any;
   private fadeInInterval: any;
 
+  /** STATE MANAGEMENT **/
+  isMusicPlaying = false;
+  userMuted = false;
+  videoPlaying = false;
+
   wishes = [
-    {
-      img: 'assets/images/loves/love1.png',
-      text: 'Chúc em sinh nhật thật vui, thật nhiều năng lượng tích cực, và cười nhiều hơn tất cả những ngày trước cộng lại 💙',
-    },
-    {
-      img: 'assets/images/loves/love2.png',
-      text: 'Cảm ơn em vì đã xuất hiện và làm cuộc sống của anh rực rỡ hơn bất kỳ khoảng trời xanh nào anh từng thấy ✨',
-    },
-    {
-      img: 'assets/images/loves/love3.png',
-      text: 'Mong rằng mọi điều em ước, dù nhỏ hay lớn, đều sẽ trở thành sự thật. Còn anh sẽ ở đây — luôn cổ vũ em, và luôn tự hào về em.',
-    },
-    {
-      img: 'assets/images/loves/love4.png',
-      text: 'Hôm nay là ngày của em… nên chỉ cần em vui, chỉ cần em hạnh phúc, còn mọi thứ còn lại… để anh lo. 💑',
-    },
-    {
-      img: 'assets/images/loves/love5.png',
-      text: 'Đúng ra ở đây anh tính để thêm những bức ảnh kỉ niệm thật xịn của hai đứa mình 📸',
-    },
-    {
-      img: 'assets/images/loves/love6.png',
-      text: 'Nhưng mà… tụi mình vẫn chưa có được tấm nào thật sự “đúng nghĩa” chụp chung hết 😅',
-    },
-    {
-      img: 'assets/images/loves/love7.png',
-      text: 'Nên anh mong tụi mình sẽ có thật nhiều khoảnh khắc đẹp, thật nhiều tấm hình để sau này nhìn lại.',
-    },
-    {
-      img: 'assets/images/loves/love8.png',
-      text: 'Anh thương em, đơn giản vậy thôi 💙 và anh nghĩ… như vậy là đủ để anh luôn ở cạnh em.',
-    },
-    {
-      text: 'Và… đây là món quà nhỏ của anh, mong em sẽ thích🎁💙',
-    },
+    { img: 'assets/images/loves/love1.png', text: 'Chúc em sinh nhật thật vui, thật nhiều năng lượng tích cực, và cười nhiều hơn tất cả những ngày trước cộng lại 💙' },
+    { img: 'assets/images/loves/love2.png', text: 'Cảm ơn em vì đã xuất hiện và làm cuộc sống của anh rực rỡ hơn bất kỳ khoảng trời xanh nào anh từng thấy ✨' },
+    { img: 'assets/images/loves/love3.png', text: 'Mong rằng mọi điều em ước, dù nhỏ hay lớn, đều sẽ trở thành sự thật. Còn anh sẽ ở đây — luôn cổ vũ em, và luôn tự hào về em.' },
+    { img: 'assets/images/loves/love4.png', text: 'Hôm nay là ngày của em… nên chỉ cần em vui, chỉ cần em hạnh phúc, còn mọi thứ còn lại… để anh lo. 💑' },
+    { img: 'assets/images/loves/love5.png', text: 'Đúng ra ở đây anh tính để thêm những bức ảnh kỉ niệm thật xịn của hai đứa mình 📸' },
+    { img: 'assets/images/loves/love6.png', text: 'Nhưng mà… tụi mình vẫn chưa có được tấm nào thật sự “đúng nghĩa” chụp chung hết 😅' },
+    { img: 'assets/images/loves/love7.png', text: 'Nên anh mong tụi mình sẽ có thật nhiều khoảnh khắc đẹp, thật nhiều tấm hình để sau này nhìn lại.' },
+    { img: 'assets/images/loves/love8.png', text: 'Anh thương em, đơn giản vậy thôi 💙 và anh nghĩ… như vậy là đủ để anh luôn ở cạnh em.' },
+    { text: 'Và… đây là món quà nhỏ của anh, mong em sẽ thích🎁💙' },
   ];
 
   currentIndex = 0;
 
-  get isFirst(): boolean {
-    return this.currentIndex === 0;
-  }
+  get isFirst() { return this.currentIndex === 0; }
+  get isLast() { return this.currentIndex === this.wishes.length - 1; }
 
-  get isLast(): boolean {
-    return this.currentIndex === this.wishes.length - 1;
-  }
+  constructor(private route: ActivatedRoute, private router: Router) {}
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
-
-  // ───────────────── LIFECYCLE ─────────────────
-
-  ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id')) || 1;
       this.setIndexFromRoute(id);
     });
 
     this.spawnCats();
-    this.startMusic();
+    this.initMusicState();
   }
 
-  ngOnDestroy(): void {
-    this.clearFadeIntervals();
-    this.stopMusic();
+  ngOnDestroy() {
+    this.clearFade();
+    this.bgMusic.pause();
   }
 
-  // ───────────────── NHẠC NỀN ─────────────────
+  /** -------- MUSIC CORE -------- **/
 
-  startMusic() {
-    this.clearFadeIntervals();
+  initMusicState() {
+    this.userMuted = localStorage.getItem('musicMuted') === 'true';
+
+    const firstTime = !localStorage.getItem('musicPlayed');
+    if (firstTime && !this.userMuted) {
+      this.fadeInMusic();
+      localStorage.setItem('musicPlayed', 'true');
+    }
+  }
+
+  toggleMusic() {
+    this.userMuted = !this.userMuted;
+    localStorage.setItem('musicMuted', String(this.userMuted));
+    this.applyMusicState();
+  }
+
+  applyMusicState() {
+    if (this.userMuted || this.videoPlaying) {
+      this.fadeOutMusic();
+    } else {
+      this.fadeInMusic();
+    }
+  }
+
+  fadeInMusic() {
+    this.clearFade();
     this.bgMusic.loop = true;
-    this.bgMusic.volume = 0.3; // âm lượng mặc định nhẹ nhàng
+    this.bgMusic.volume = 0;
 
-    // Nếu đã pause trước đó thì play lại
-    this.bgMusic.play().catch((err) => {
-      console.log('Autoplay có thể bị chặn, cần user tương tác trước:', err);
+    this.bgMusic.play().then(() => {
+      this.isMusicPlaying = true;
+      this.fadeInInterval = setInterval(() => {
+        if (this.bgMusic.volume < 0.3) this.bgMusic.volume += 0.05;
+        else clearInterval(this.fadeInInterval);
+      }, 100);
     });
   }
 
-  stopMusic() {
-    this.bgMusic.pause();
-    this.bgMusic.currentTime = 0;
-  }
-
-  private clearFadeIntervals() {
-    if (this.fadeOutInterval) {
-      clearInterval(this.fadeOutInterval);
-      this.fadeOutInterval = null;
-    }
-    if (this.fadeInInterval) {
-      clearInterval(this.fadeInInterval);
-      this.fadeInInterval = null;
-    }
-  }
-
-  private fadeOutMusic() {
-    this.clearFadeIntervals();
-
+  fadeOutMusic() {
+    this.clearFade();
     this.fadeOutInterval = setInterval(() => {
-      if (this.bgMusic.volume > 0.05) {
-        this.bgMusic.volume = this.bgMusic.volume - 0.05;
-      } else {
+      if (this.bgMusic.volume > 0.05) this.bgMusic.volume -= 0.05;
+      else {
         this.bgMusic.volume = 0;
         this.bgMusic.pause();
+        this.isMusicPlaying = false;
         clearInterval(this.fadeOutInterval);
-        this.fadeOutInterval = null;
       }
-    }, 80);
+    }, 100);
   }
 
-  private fadeInMusic() {
-    this.clearFadeIntervals();
-
-    // Nếu nhạc đang dừng thì play lại từ đầu, nhưng volume nhỏ
-    if (this.bgMusic.paused) {
-      this.bgMusic.volume = 0;
-      this.bgMusic.play().catch((err) => {
-        console.log('Không play lại được bgMusic:', err);
-      });
-    }
-
-    this.fadeInInterval = setInterval(() => {
-      if (this.bgMusic.volume < 0.3) {
-        this.bgMusic.volume = this.bgMusic.volume + 0.05;
-      } else {
-        this.bgMusic.volume = 0.3;
-        clearInterval(this.fadeInInterval);
-        this.fadeInInterval = null;
-      }
-    }, 80);
+  clearFade() {
+    clearInterval(this.fadeInInterval);
+    clearInterval(this.fadeOutInterval);
   }
 
-  // ───────────────── VIDEO EVENTS ─────────────────
+  /** -------- VIDEO EVENTS -------- **/
 
-  onVideoPlay(): void {
-    this.fadeOutMusic();
+  onVideoPlay() {
+    this.videoPlaying = true;
+    this.applyMusicState();
   }
 
-  onVideoPause(): void {
-    this.fadeInMusic();
+  onVideoPause(event: Event) {
+    const video = event.target as HTMLVideoElement;
+    this.videoPlaying = !video.ended && !video.paused;
+    this.applyMusicState();
   }
 
-  onVideoEnded(): void {
-    this.fadeInMusic();
+  onVideoEnded() {
+    this.videoPlaying = false;
+    this.applyMusicState();
   }
 
-  // ───────────────── ROUTE & WISH NAV ─────────────────
+  /** -------- NAV -------- **/
 
   private setIndexFromRoute(id: number): void {
-    const max = this.wishes.length;
-    if (id < 1 || id > max) {
+    if (id < 1 || id > this.wishes.length) {
       this.router.navigateByUrl('/not-found');
       return;
     }
     this.currentIndex = id - 1;
   }
 
-  goPrev(): void {
-    if (!this.isFirst) {
-      const prev = this.currentIndex;
-      this.router.navigate(['/wishes', prev]);
-    }
-  }
+  goPrev() { if (!this.isFirst) this.router.navigate(['/wishes', this.currentIndex]); }
+  goNext() { if (!this.isLast) this.router.navigate(['/wishes', this.currentIndex + 2]); }
+  goBackToFirstWish() { this.router.navigate(['/wishes', 1]); }
 
-  goNext(): void {
-    if (!this.isLast) {
-      const next = this.currentIndex + 2;
-      this.router.navigate(['/wishes', next]);
-    }
-  }
-
-  goBackToFirstWish(): void {
-    this.router.navigate(['/wishes', 1]);
-  }
-
-  // ───────────────── MÈO RƠI ─────────────────
-
+  /** --------- ANIMATION MÈO -------- **/
   spawnCats() {
-    const totalCats = 19;
-    const container = document.body;
-
-    for (let i = 0; i < totalCats; i++) {
+    const total = 19;
+    for (let i = 0; i < total; i++) {
       const img = document.createElement('img');
       img.src = `assets/images/cats/cat${(i % 19) + 1}.png`;
       img.classList.add('falling-cat');
-
       img.style.left = Math.random() * 100 + 'vw';
-      img.style.animationDuration = 5 + Math.random() * 6 + 's';
-      img.style.animationDelay = Math.random() * 4 + 's';
+      img.style.animationDuration = 5 + Math.random() * 4 + 's';
+      img.style.animationDelay = Math.random() * 3 + 's';
       img.style.width = 50 + Math.random() * 50 + 'px';
-
-      container.appendChild(img);
+      document.body.appendChild(img);
     }
   }
 }

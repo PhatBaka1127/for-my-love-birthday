@@ -24,7 +24,7 @@
       controls
       class="wish-video"
       (play)="onVideoPlay()"
-      (pause)="onVideoPause()"
+      (pause)="onVideoPause($event)"
       (ended)="onVideoEnded()"
     >
       <source src="assets/videos/video.mp4" type="video/mp4" />
@@ -45,3 +45,7 @@
     </button>
   </div>
 </div>
+
+<button class="music-toggle" (click)="toggleMusic()">
+  {{ isMusicPlaying ? '🔇' : '🔊' }}
+</button>
