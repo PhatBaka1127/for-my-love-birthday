@@ -63,11 +63,23 @@ export class WishPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleMusic() {
-    this.userMuted = !this.userMuted;
-    localStorage.setItem('musicMuted', String(this.userMuted));
-    this.applyMusicState();
+toggleMusic() {
+  this.userMuted = !this.userMuted;
+  localStorage.setItem('musicMuted', String(this.userMuted));
+
+  // 🍏 iOS requirement: must call pause() or play() immediately inside the click event
+  if (this.userMuted) {
+    this.bgMusic.pause();   // <- bắt buộc đặt ở đây, ngay lập tức
+    this.isMusicPlaying = false;
+    this.fadeOutMusic();    // fade chỉ làm volume mượt chứ không quyết định việc pause nữa
+  } else {
+    this.bgMusic.volume = 0;
+    this.bgMusic.play().then(() => {
+      this.isMusicPlaying = true;
+      this.fadeInMusic();
+    });
   }
+}
 
   applyMusicState() {
     if (this.userMuted || this.videoPlaying) {
