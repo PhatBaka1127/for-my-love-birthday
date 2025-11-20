@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
@@ -6,7 +6,12 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './wish-page.component.html',
   styleUrls: ['./wish-page.component.css'],
 })
-export class WishPageComponent implements OnInit {
+export class WishPageComponent implements OnInit, OnDestroy {
+  // 🔊 Nhạc nền
+  private bgMusic = new Audio('assets/musics/music.m4a');
+  private fadeOutInterval: any;
+  private fadeInInterval: any;
+
   wishes = [
     {
       img: 'assets/images/loves/love1.png',
@@ -55,20 +60,113 @@ export class WishPageComponent implements OnInit {
     return this.currentIndex === this.wishes.length - 1;
   }
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+
+  // ───────────────── LIFECYCLE ─────────────────
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       const id = Number(params.get('id')) || 1;
       this.setIndexFromRoute(id);
     });
+
     this.spawnCats();
+    this.startMusic();
   }
+
+  ngOnDestroy(): void {
+    this.clearFadeIntervals();
+    this.stopMusic();
+  }
+
+  // ───────────────── NHẠC NỀN ─────────────────
+
+  startMusic() {
+    this.clearFadeIntervals();
+    this.bgMusic.loop = true;
+    this.bgMusic.volume = 0.3; // âm lượng mặc định nhẹ nhàng
+
+    // Nếu đã pause trước đó thì play lại
+    this.bgMusic.play().catch((err) => {
+      console.log('Autoplay có thể bị chặn, cần user tương tác trước:', err);
+    });
+  }
+
+  stopMusic() {
+    this.bgMusic.pause();
+    this.bgMusic.currentTime = 0;
+  }
+
+  private clearFadeIntervals() {
+    if (this.fadeOutInterval) {
+      clearInterval(this.fadeOutInterval);
+      this.fadeOutInterval = null;
+    }
+    if (this.fadeInInterval) {
+      clearInterval(this.fadeInInterval);
+      this.fadeInInterval = null;
+    }
+  }
+
+  private fadeOutMusic() {
+    this.clearFadeIntervals();
+
+    this.fadeOutInterval = setInterval(() => {
+      if (this.bgMusic.volume > 0.05) {
+        this.bgMusic.volume = this.bgMusic.volume - 0.05;
+      } else {
+        this.bgMusic.volume = 0;
+        this.bgMusic.pause();
+        clearInterval(this.fadeOutInterval);
+        this.fadeOutInterval = null;
+      }
+    }, 80);
+  }
+
+  private fadeInMusic() {
+    this.clearFadeIntervals();
+
+    // Nếu nhạc đang dừng thì play lại từ đầu, nhưng volume nhỏ
+    if (this.bgMusic.paused) {
+      this.bgMusic.volume = 0;
+      this.bgMusic.play().catch((err) => {
+        console.log('Không play lại được bgMusic:', err);
+      });
+    }
+
+    this.fadeInInterval = setInterval(() => {
+      if (this.bgMusic.volume < 0.3) {
+        this.bgMusic.volume = this.bgMusic.volume + 0.05;
+      } else {
+        this.bgMusic.volume = 0.3;
+        clearInterval(this.fadeInInterval);
+        this.fadeInInterval = null;
+      }
+    }, 80);
+  }
+
+  // ───────────────── VIDEO EVENTS ─────────────────
+
+  onVideoPlay(): void {
+    this.fadeOutMusic();
+  }
+
+  onVideoPause(): void {
+    this.fadeInMusic();
+  }
+
+  onVideoEnded(): void {
+    this.fadeInMusic();
+  }
+
+  // ───────────────── ROUTE & WISH NAV ─────────────────
 
   private setIndexFromRoute(id: number): void {
     const max = this.wishes.length;
     if (id < 1 || id > max) {
-      // nếu id vượt quá thì chuyển 404
       this.router.navigateByUrl('/not-found');
       return;
     }
@@ -92,6 +190,8 @@ export class WishPageComponent implements OnInit {
   goBackToFirstWish(): void {
     this.router.navigate(['/wishes', 1]);
   }
+
+  // ───────────────── MÈO RƠI ─────────────────
 
   spawnCats() {
     const totalCats = 19;

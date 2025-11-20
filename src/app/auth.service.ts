@@ -5,8 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class AuthService {
   private readonly STORAGE_KEY = 'gf_birthday_logged_in';
-  // THAY giá trị này bằng ngày sinh của bạn gái (format YYYY-MM-DD)
-  private readonly allowedBirthdate = '2005-11-21';
+  private readonly allowedBirthdate = '21112005'; // đúng format dd/mm/yyyy
 
   isAuthenticated(): boolean {
     return localStorage.getItem(this.STORAGE_KEY) === 'true';

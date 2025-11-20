@@ -8,6 +8,19 @@
   box-sizing: border-box;
 }
 
+/* Layer background ảnh bánh - không chỉnh body */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("assets/images/cake.png") center/cover no-repeat;
+  opacity: 0.25;  /* độ rõ (0.10 = rất mờ, 0.25 = rõ hơn) */
+  filter: blur(10px);
+  z-index: -1; /* để nằm sau mọi thứ */
+  pointer-events: none;
+}
+
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -108,9 +121,23 @@ h3 {
 }
 
 /* Mobile responsive */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .content-card {
-    padding: 22px;
+    padding: 24px;
+    min-height: 70vh;
+  }
+
+  /* 👇 chỉnh lại hàng nút trên mobile */
+  .btn-row {
+    width: 100%;
+    flex-direction: column;  /* xếp dọc */
+    align-items: stretch;    /* nút full chiều ngang */
+    gap: 10px;
+  }
+
+  .btn {
+    width: 100%;             /* full width */
+    min-width: 0;            /* bỏ min-width 150px cho mobile */
   }
 
   h1 {
@@ -141,4 +168,10 @@ h3 {
     padding: 24px;
     min-height: 70vh; /* trên mobile vẫn cao, đỡ bị cụt */
   }
+}
+
+.hidden-player {
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
