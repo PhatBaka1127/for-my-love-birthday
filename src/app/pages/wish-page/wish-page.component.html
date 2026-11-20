@@ -19,6 +19,7 @@
 
   <!-- VIDEO chỉ ở trang cuối -->
   <div *ngIf="isLast" class="video-container">
+    <!-- Video hiện tại -->
     <video
       controls
       class="wish-video"
@@ -27,6 +28,15 @@
       (ended)="onVideoEnded()"
     >
       <source src="assets/videos/video.mp4" type="video/mp4" />
+      Trình duyệt của em không hỗ trợ video rồi 🥺
+    </video>
+
+    <!-- Video 2026 -->
+    <video
+      controls
+      class="wish-video"
+    >
+      <source src="assets/videos/video_2026.mp4" type="video/mp4" />
       Trình duyệt của em không hỗ trợ video rồi 🥺
     </video>
   </div>
